@@ -1,30 +1,38 @@
 package jsolutions;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class Server {
 
+	private static final int SERVER_PORT = 3322;
+
 	public static void main(String[] args) {
 
-		ServerSocket server;
+		Socket socket = null;
 
-		try {
+		try (ServerSocket server = new ServerSocket(SERVER_PORT);) {
 
-			server = new ServerSocket(3322);
+			System.out.println("[SERVER]: Servidor iniciado na porta " + SERVER_PORT);
 
-			System.out.println("Servidor iniciado na porta 3322");
+			int numMessages = 0;
 
-			Socket cliente = server.accept();
+			while (numMessages < 5) {
 
-			System.out.println("Cliente se conectour com o IP " + cliente.getInetAddress().getHostAddress());
+				socket = server.accept();
 
-			System.out.println(cliente.getInputStream().toString());
+				DataInputStream inputData = new DataInputStream(socket.getInputStream());
+				byte[] byteArrray = inputData.readAllBytes();
+				System.out.println("[RECEIVED FROM CLIENT]: " + new String(byteArrray, StandardCharsets.UTF_8));
 
-			server.close();
+				numMessages++;
 
-			System.out.println("Servidor encerrado!");
+			}
+
+			System.out.println("[SERVER]: Servidor encerrado!");
 
 		} catch (IOException e) {
 			e.printStackTrace();
