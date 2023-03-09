@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class Server {
 
@@ -12,9 +11,7 @@ public class Server {
 
 	public static void main(String[] args) {
 
-		Socket socket = null;
-
-		try (ServerSocket server = new ServerSocket(SERVER_PORT);) {
+		try (ServerSocket server = new ServerSocket(SERVER_PORT)) {
 
 			System.out.println("[SERVER]: Servidor iniciado na porta " + SERVER_PORT);
 
@@ -22,14 +19,14 @@ public class Server {
 
 			while (numMessages < 5) {
 
-				socket = server.accept();
+				Socket socket = server.accept();
 
-				DataInputStream inputData = new DataInputStream(socket.getInputStream());
-				byte[] byteArrray = inputData.readAllBytes();
-				System.out.println("[RECEIVED FROM CLIENT]: " + new String(byteArrray, StandardCharsets.UTF_8));
-
+				try (DataInputStream inputData = new DataInputStream(socket.getInputStream())) {
+					int index = inputData.readInt();
+					String message = inputData.readUTF();
+					System.out.println("[RECEIVED FROM CLIENT]: (" + index + ") " + message);
+				}
 				numMessages++;
-
 			}
 
 			System.out.println("[SERVER]: Servidor encerrado!");
